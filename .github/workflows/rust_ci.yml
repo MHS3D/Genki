@@ -33,6 +33,12 @@ jobs:
         with:
           toolchain: nightly
           components: rust-src
+      - name: Install clippy
+        run: rustup component add clippy
+      - name: Install rustfmt
+        run: rustup component add rustfmt
+      - name: Install ldproxy
+        run: cargo install ldproxy
       - name: Enable caching
         uses: Swatinem/rust-cache@v2
       - name: Run command

@@ -1,11 +1,4 @@
-# Ignore build artifacts
-bin/
-*.bin
-*.elf
-*.hex
-*.map
-*.lst
-*.o
-*.d
-*.a
-*.out
+/.vscode
+/.embuild
+/target
+/Cargo.lock

@@ -8,6 +8,8 @@ use esp_idf_svc::{
         i2c::{I2c, I2cConfig, I2cDriver},
         prelude::Peripherals,
     },
+    mqtt::client::*,
+    sys::EspError,
 };
 
 use max3010x::{Led, Max3010x, SampleAveraging};
@@ -22,10 +24,35 @@ const BAUDRATE: u32 = 100;
 /// file `cfg.toml`.
 #[toml_cfg::toml_config]
 pub struct Config {
-    #[default("genkiwlan")]
+    #[default("baguette")]
     wifi_ssid: &'static str,
-    #[default("genkipassword")]
+    #[default("broetchen123")]
     wifi_psk: &'static str,
+    #[default("mqtt://hivemq.cloud:8883")]
+    mqtt_url: &'static str,
+    #[default("baguette")]
+    mqtt_client_id: &'static str,
+    #[default("")]
+    mqtt_topic: &'static str,
+    #[default("baguette")]
+    mqtt_username: &'static str,
+    #[default("broetchen123")]
+    mqtt_password: &'static str,
+}
+
+fn mqtt_create(
+    url: &str,
+    client_id: &str,
+) -> Result<(EspMqttClient<'static>, EspMqttConnection), EspError> {
+    let (mqtt_client, mqtt_conn) = EspMqttClient::new(
+        url,
+        &MqttClientConfiguration {
+            client_id: Some(client_id),
+            ..Default::default()
+        },
+    )?;
+
+    Ok((mqtt_client, mqtt_conn))
 }
 
 fn main() -> Result<()> {
@@ -70,25 +97,40 @@ fn main() -> Result<()> {
     // max3010.enable_fifo_rollover().unwrap();
     // log::info!("MAX3010 config");
 
-    // let sysloop = EspSystemEventLoop::take()?;
+    let sysloop = EspSystemEventLoop::take()?;
 
-    // let app_config = CONFIG;
-    // // Connect to the Wi-Fi network
-    // let _wifi = match wifi::connect_wifi(
-    //     app_config.wifi_ssid,
-    //     app_config.wifi_psk,
-    //     peripherals.modem,
-    //     sysloop,
-    // ) {
-    //     Ok(inner) => {
-    //         println!("Connected to Wi-Fi network!");
-    //         inner
-    //     }
-    //     Err(err) => {
-    //         // Red!
-    //         bail!("Could not connect to Wi-Fi network: {:?}", err)
-    //     }
-    // };
+    let app_config = CONFIG;
+    // Connect to the Wi-Fi network
+    let _wifi = match wifi::connect_wifi(
+        app_config.wifi_ssid,
+        app_config.wifi_psk,
+        peripherals.modem,
+        sysloop,
+    ) {
+        Ok(inner) => {
+            println!("Connected to Wi-Fi network!");
+            inner
+        }
+        Err(err) => {
+            // Red!
+            bail!("Could not connect to Wi-Fi network: {:?}", err)
+        }
+    };
+
+    let (mut client, mut conn) = mqtt_create(&app_config.mqtt_url, &app_config.mqtt_client_id)?;
+
+    log::info!("MQTT Listening for messages");
+
+    while let Ok(event) = conn.next() {
+        log::info!("[Queue] Event: {}", event.payload());
+    }
+
+    log::info!("Connection closed");
+
+    // Just to give a chance of our connection to get even the first published message
+    std::thread::sleep(Duration::from_millis(500));
+
+    let payload = "Hello from esp-mqtt-demo!";
 
     // server::init_server();
 
@@ -98,6 +140,14 @@ fn main() -> Result<()> {
 
     // Infinite loop
     loop {
+        client.enqueue("baguette", QoS::AtMostOnce, false, payload.as_bytes())?;
+
+        log::info!("Published \"{payload}\" to topic \"baguette\"");
+
+        let sleep_secs = 2;
+
+        log::info!("Now sleeping for {sleep_secs}s...");
+        std::thread::sleep(Duration::from_secs(sleep_secs));
         // let temperature = match max3010.read_temperature() {
         //     Ok(temp) => temp,
         //     Err(err) => {
@@ -140,7 +190,7 @@ fn main() -> Result<()> {
                 continue;
             }
         };
-        
+
         //log::info!("Temperature: {}", temperature);
         // log::info!("Reading Heartrate");
         // let mut data: [u32; 4] = [0; 4];

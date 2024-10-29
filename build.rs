@@ -6,6 +6,12 @@ pub struct Config {
     wifi_ssid: &'static str,
     #[default("")]
     wifi_psk: &'static str,
+    #[default("")]
+    mqtt_url: &'static str,
+    #[default("")]
+    mqtt_client_id: &'static str,
+    #[default("")]
+    mqtt_topic: &'static str,
 }
 
 fn main() {

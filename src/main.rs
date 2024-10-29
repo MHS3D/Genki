@@ -33,14 +33,14 @@ fn main() -> Result<()> {
 
     let peripherals = Peripherals::take().unwrap();
     let i2c = peripherals.i2c0;
-    let sda = peripherals.pins.gpio0;
-    let scl = peripherals.pins.gpio1;
-    let rx = peripherals.pins.gpio3;
-    let tx = peripherals.pins.gpio4;
+    let sda = peripherals.pins.gpio22;
+    let scl = peripherals.pins.gpio23;
+    let rx = peripherals.pins.gpio17;
+    let tx = peripherals.pins.gpio16;
 
     // Init I2C
     let i2c_config = I2cConfig::new().baudrate(esp_idf_svc::hal::prelude::Hertz(BAUDRATE));
-    let mut i2c_driver = I2cDriver::new(i2c, sda, scl, &i2c_config)?;
+    let i2c_driver = I2cDriver::new(i2c, sda, scl, &i2c_config)?;
 
     // Init MPU6050 Gyro
     // Only one I2C device can be initialized at a time, @TODO: proper mutex handling to have both at the same time

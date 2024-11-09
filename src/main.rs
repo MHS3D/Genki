@@ -1,12 +1,12 @@
 use std::{thread::sleep, time::Duration};
 
-use anyhow::{bail, Result};
+use anyhow::Result;
+use shared_bus::BusManagerSimple;
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{
         delay::Delay,
-        i2c::{I2c, I2cConfig, I2cDriver},
-        peripheral,
+        i2c::{I2cConfig, I2cDriver},
         prelude::Peripherals,
     },
     mqtt::client::*,
@@ -84,21 +84,21 @@ fn main() -> Result<()> {
     let app_config = CONFIG;
     // Connect to the Wi-Fi network
     let peripherals = Peripherals::take().unwrap();
-    let _wifi = match wifi::connect_wifi(
-        app_config.wifi_ssid,
-        app_config.wifi_psk,
-        peripherals.modem,
-        sysloop,
-    ) {
-        Ok(inner) => {
-            println!("Connected to Wi-Fi network!");
-            inner
-        }
-        Err(err) => {
-            // Red!
-            bail!("Could not connect to Wi-Fi network: {:?}", err)
-        }
-    };
+    // let _wifi = match wifi::connect_wifi(
+    //     app_config.wifi_ssid,
+    //     app_config.wifi_psk,
+    //     peripherals.modem,
+    //     sysloop,
+    // ) {
+    //     Ok(inner) => {
+    //         println!("Connected to Wi-Fi network!");
+    //         inner
+    //     }
+    //     Err(err) => {
+    //         // Red!
+    //         bail!("Could not connect to Wi-Fi network: {:?}", err)
+    //     }
+    // };
 
     log::info!("Connection closed");
 
@@ -109,68 +109,62 @@ fn main() -> Result<()> {
 
     // Infinite loop
 
+    let peripherals = Peripherals::take().unwrap();
+    let i2c = peripherals.i2c0;
+    let sda = peripherals.pins.gpio22;
+    let scl = peripherals.pins.gpio23;
+
+    // Init I2C
+    let i2c_config = I2cConfig::new().baudrate(esp_idf_svc::hal::prelude::Hertz(BAUDRATE));
+    log::info!("I2C Config: {:?}", i2c_config);
+    let i2c_driver = I2cDriver::new(i2c, sda, scl, &i2c_config)?;
+    log::info!("I2C Driver init");
+
+    // Create a shared bus manager
+    let i2c_bus = BusManagerSimple::new(i2c_driver);
+    log::info!("I2C Bus Manager init");
+
+    log::info!("Initializing Sensors");
+
+    let mut max3010 = Max3010x::new_max30102(i2c_bus.acquire_i2c());
+    log::info!("MAX3010 init");
+    max3010.set_sample_averaging(SampleAveraging::Sa4).unwrap();
+    max3010.set_pulse_amplitude(Led::All, 15).unwrap();
+    max3010.enable_fifo_rollover().unwrap();
+    log::info!("MAX3010 config");
+
+    let mut mpu = Mpu6050::new(i2c_bus.acquire_i2c());
+    let mut delay = Delay::new_default();
+    let _ = mpu.init(&mut delay);
+    let mut oximeter = max3010.into_oximeter().unwrap();
+    log::info!("MPU6050 init");
+
     let mut sensor_to_use = SensorToUse::MPU6050;
 
     loop {
         let sleep_secs = 2;
 
-        let peripherals = Peripherals::take().unwrap();
-        let i2c = peripherals.i2c0;
-        let sda = peripherals.pins.gpio22;
-        let scl = peripherals.pins.gpio23;
-
-        // Init I2C
-        let i2c_config = I2cConfig::new().baudrate(esp_idf_svc::hal::prelude::Hertz(BAUDRATE));
-        log::info!("I2C Config: {:?}", i2c_config);
-
-        let i2c_driver = I2cDriver::new(i2c, sda, scl, &i2c_config)?;
-        log::info!("I2C Driver init");
-
         match sensor_to_use {
             SensorToUse::MAX3010 => {
-                // Init MAX3010 Pulse Oximeter
-                let mut max3010 = Max3010x::new_max30102(i2c_driver);
-                log::info!("MAX3010 init");
-
-                max3010.set_sample_averaging(SampleAveraging::Sa4).unwrap();
-                max3010.set_pulse_amplitude(Led::All, 15).unwrap();
-                max3010.enable_fifo_rollover().unwrap();
-                log::info!("MAX3010 config");
-
-                let temperature = max3010.read_temperature().unwrap();
-
+                let temperature = oximeter.read_temperature().unwrap();
                 log::info!("Temperature: {}", temperature);
 
                 log::info!("Reading Heartrate");
-                let mut heartrate = max3010.into_heart_rate().unwrap();
+                let mut heartrate = oximeter.into_heart_rate().unwrap();
                 let mut data: [u32; 4] = [0; 4];
                 let samples_read = heartrate.read_fifo(&mut data).unwrap();
                 log::info!("Temperature: {:?} | Read Samples: {}", data, samples_read);
 
                 // Change to oximeter mode
-                let mut oximeter = heartrate.into_oximeter().unwrap();
+                oximeter = heartrate.into_oximeter().unwrap();
                 let samples_read = oximeter.read_fifo(&mut data).unwrap();
                 log::info!("Oximeter: {:?} | Read Samples: {}", data, samples_read);
 
                 sensor_to_use = SensorToUse::MPU6050;
             }
             SensorToUse::MPU6050 => {
-                // Init MPU6050 Gyro
-                // Only one I2C device can be initialized at a time, @TODO: proper mutex handling to have both at the same time
-                let mut mpu = Mpu6050::new(i2c_driver);
-                let mut delay = Delay::new_default();
-                let _ = mpu.init(&mut delay);
-                log::info!("MPU6050 init");
-
                 log::info!("Now sleeping for {sleep_secs}s...");
                 std::thread::sleep(Duration::from_secs(sleep_secs));
-                // let temperature = match max3010.read_temperature() {
-                //     Ok(temp) => temp,
-                //     Err(err) => {
-                //         log::error!("Error reading temperature: {:?}", err);
-                //         continue;
-                //     }
-                // };
 
                 log::info!("Reading Accel");
 

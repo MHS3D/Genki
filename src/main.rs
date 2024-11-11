@@ -1,7 +1,6 @@
 use std::{thread::sleep, time::Duration};
 
 use anyhow::Result;
-use shared_bus::BusManagerSimple;
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{
@@ -12,6 +11,7 @@ use esp_idf_svc::{
     mqtt::client::*,
     sys::EspError,
 };
+use shared_bus::BusManagerSimple;
 
 use max3010x::{Led, Max3010x, SampleAveraging};
 use mpu6050::*;
@@ -29,35 +29,9 @@ pub struct Config {
     wifi_ssid: &'static str,
     #[default("genkipassword")]
     wifi_psk: &'static str,
-    #[default("mqtt://68a4e2c14c1149f5b8b036ee063aa8c6.s1.eu.hivemq.cloud:8883")]
-    mqtt_url: &'static str,
-    #[default("GENKIUHR")]
-    mqtt_client_id: &'static str,
-    #[default("")]
-    mqtt_topic: &'static str,
-    #[default("GENKIUHRUSER")]
-    mqtt_username: &'static str,
-    #[default("5xmrCzXy3ak8I2")]
-    mqtt_password: &'static str,
 }
 
-fn mqtt_create() -> Result<(EspMqttClient<'static>, EspMqttConnection), EspError> {
-    log::info!("Creating MQTT connection to {}", CONFIG.mqtt_url);
-
-    let (mqtt_client, mqtt_conn) = EspMqttClient::new(
-        &CONFIG.mqtt_url,
-        &MqttClientConfiguration {
-            client_id: Some(CONFIG.mqtt_username),
-            username: Some(CONFIG.mqtt_username),
-            password: Some(CONFIG.mqtt_password),
-            ..Default::default()
-        },
-    )?;
-
-    log::info!("MQTT connection created");
-
-    Ok((mqtt_client, mqtt_conn))
-}
+const IGNORE_WIFI: bool = false;
 
 enum SensorToUse {
     MAX3010,
@@ -84,28 +58,30 @@ fn main() -> Result<()> {
     let app_config = CONFIG;
     // Connect to the Wi-Fi network
     let peripherals = Peripherals::take().unwrap();
-    // let _wifi = match wifi::connect_wifi(
-    //     app_config.wifi_ssid,
-    //     app_config.wifi_psk,
-    //     peripherals.modem,
-    //     sysloop,
-    // ) {
-    //     Ok(inner) => {
-    //         println!("Connected to Wi-Fi network!");
-    //         inner
-    //     }
-    //     Err(err) => {
-    //         // Red!
-    //         bail!("Could not connect to Wi-Fi network: {:?}", err)
-    //     }
-    // };
+    if !IGNORE_WIFI {
+        let _wifi = match wifi::connect_wifi(
+            app_config.wifi_ssid,
+            app_config.wifi_psk,
+            peripherals.modem,
+            sysloop,
+        ) {
+            Ok(inner) => {
+                println!("Connected to Wi-Fi network!");
+                inner
+            }
+            Err(err) => {
+                // Red!
+                bail!("Could not connect to Wi-Fi network: {:?}", err)
+            }
+        };
 
-    log::info!("Connection closed");
+        log::info!("Connection closed");
 
-    // Just to give a chance of our connection to get even the first published message
-    std::thread::sleep(Duration::from_millis(500));
+        // Just to give a chance of our connection to get even the first published message
+        std::thread::sleep(Duration::from_millis(500));
 
-    // server::init_server()
+        server::init_server();
+    }
 
     // Get the peripherals
     let i2c = peripherals.i2c0;

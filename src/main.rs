@@ -107,9 +107,7 @@ fn main() -> Result<()> {
 
     // server::init_server()
 
-    // Infinite loop
-
-    let peripherals = Peripherals::take().unwrap();
+    // Get the peripherals
     let i2c = peripherals.i2c0;
     let sda = peripherals.pins.gpio22;
     let scl = peripherals.pins.gpio23;
@@ -126,17 +124,15 @@ fn main() -> Result<()> {
 
     log::info!("Initializing Sensors");
 
-    let mut max3010 = Max3010x::new_max30102(i2c_bus.acquire_i2c());
+    // let mut max3010 = Max3010x::new_max30102(i2c_bus.acquire_i2c());
     log::info!("MAX3010 init");
-    max3010.set_sample_averaging(SampleAveraging::Sa4).unwrap();
-    max3010.set_pulse_amplitude(Led::All, 15).unwrap();
-    max3010.enable_fifo_rollover().unwrap();
+    // max3010.enable_fifo_rollover().unwrap();
+    // let mut oximeter = max3010.into_oximeter().unwrap();
     log::info!("MAX3010 config");
 
     let mut mpu = Mpu6050::new(i2c_bus.acquire_i2c());
     let mut delay = Delay::new_default();
     let _ = mpu.init(&mut delay);
-    let mut oximeter = max3010.into_oximeter().unwrap();
     log::info!("MPU6050 init");
 
     let mut sensor_to_use = SensorToUse::MPU6050;
@@ -146,19 +142,19 @@ fn main() -> Result<()> {
 
         match sensor_to_use {
             SensorToUse::MAX3010 => {
-                let temperature = oximeter.read_temperature().unwrap();
-                log::info!("Temperature: {}", temperature);
+                // let temperature = oximeter.read_temperature().unwrap();
+                // log::info!("Temperature: {}", temperature);
 
-                log::info!("Reading Heartrate");
-                let mut heartrate = oximeter.into_heart_rate().unwrap();
-                let mut data: [u32; 4] = [0; 4];
-                let samples_read = heartrate.read_fifo(&mut data).unwrap();
-                log::info!("Temperature: {:?} | Read Samples: {}", data, samples_read);
+                // log::info!("Reading Heartrate");
+                // let mut heartrate = oximeter.into_heart_rate().unwrap();
+                // let mut data: [u32; 4] = [0; 4];
+                // let samples_read = heartrate.read_fifo(&mut data).unwrap();
+                // log::info!("Temperature: {:?} | Read Samples: {}", data, samples_read);
 
-                // Change to oximeter mode
-                oximeter = heartrate.into_oximeter().unwrap();
-                let samples_read = oximeter.read_fifo(&mut data).unwrap();
-                log::info!("Oximeter: {:?} | Read Samples: {}", data, samples_read);
+                // // Change to oximeter mode
+                // oximeter = heartrate.into_oximeter().unwrap();
+                // let samples_read = oximeter.read_fifo(&mut data).unwrap();
+                // log::info!("Oximeter: {:?} | Read Samples: {}", data, samples_read);
 
                 sensor_to_use = SensorToUse::MPU6050;
             }

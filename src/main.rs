@@ -1,6 +1,8 @@
-use std::{thread::sleep, time::Duration};
+#![feature(duration_millis_float)]
 
-use anyhow::Result;
+use std::{sync::{Arc, Mutex}, thread::sleep, time::Duration};
+
+use anyhow::{bail, Result};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{
@@ -11,13 +13,16 @@ use esp_idf_svc::{
     mqtt::client::*,
     sys::EspError,
 };
+use shared::SharedData;
 use shared_bus::BusManagerSimple;
 
 use max3010x::{Led, Max3010x, SampleAveraging};
 use mpu6050::*;
 
 mod server;
+mod timer;
 mod wifi;
+mod shared;
 
 const BAUDRATE: u32 = 100;
 
@@ -53,6 +58,8 @@ fn main() -> Result<()> {
 
     log::info!("Defined peripherals");
 
+    let shared_data = Arc::new(Mutex::new(SharedData::new()));
+
     let sysloop = EspSystemEventLoop::take()?;
 
     let app_config = CONFIG;
@@ -80,7 +87,7 @@ fn main() -> Result<()> {
         // Just to give a chance of our connection to get even the first published message
         std::thread::sleep(Duration::from_millis(500));
 
-        server::init_server();
+        server::init_server(shared_data.clone());
     }
 
     // Get the peripherals
@@ -112,6 +119,8 @@ fn main() -> Result<()> {
     log::info!("MPU6050 init");
 
     let mut sensor_to_use = SensorToUse::MPU6050;
+
+    let timer = timer::Timer::new();
 
     loop {
         let sleep_secs = 2;
@@ -150,6 +159,7 @@ fn main() -> Result<()> {
                         continue;
                     }
                 };
+                let accel_timestamp = timer.elapsed();
 
                 let accel_angles = match mpu.get_acc_angles() {
                     Ok(angles) => {
@@ -161,6 +171,7 @@ fn main() -> Result<()> {
                         continue;
                     }
                 };
+                let accel_angles_timestamp = timer.elapsed();
 
                 let gyrodata = match mpu.get_gyro() {
                     Ok(gyro) => {
@@ -172,6 +183,13 @@ fn main() -> Result<()> {
                         continue;
                     }
                 };
+                let gyro_timestamp = timer.elapsed();
+
+                {
+                    let mut shared_data = shared_data.lock().unwrap();
+                    shared_data.add_accel(accel.x, accel.y, accel.z, accel_timestamp);
+                    shared_data.add_gyro(gyrodata.x, gyrodata.y, gyrodata.z, gyro_timestamp);
+                }
 
                 sensor_to_use = SensorToUse::MAX3010;
             }

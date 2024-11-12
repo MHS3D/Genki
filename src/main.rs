@@ -1,6 +1,10 @@
 #![feature(duration_millis_float)]
 
-use std::{sync::{Arc, Mutex}, thread::sleep, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    thread::{sleep, spawn},
+    time::Duration,
+};
 
 use anyhow::{bail, Result};
 use esp_idf_svc::{
@@ -20,9 +24,9 @@ use max3010x::{Led, Max3010x, SampleAveraging};
 use mpu6050::*;
 
 mod server;
+mod shared;
 mod timer;
 mod wifi;
-mod shared;
 
 const BAUDRATE: u32 = 100;
 
@@ -30,9 +34,9 @@ const BAUDRATE: u32 = 100;
 /// file `cfg.toml`.
 #[toml_cfg::toml_config]
 pub struct Config {
-    #[default("genkiwlan")]
+    #[default("baguette")]
     wifi_ssid: &'static str,
-    #[default("genkipassword")]
+    #[default("broetchen123")]
     wifi_psk: &'static str,
 }
 
@@ -60,35 +64,40 @@ fn main() -> Result<()> {
 
     let shared_data = Arc::new(Mutex::new(SharedData::new()));
 
+    log::info!("Shared Data created");
+
     let sysloop = EspSystemEventLoop::take()?;
+
+    log::info!("System Event Loop taken");
 
     let app_config = CONFIG;
     // Connect to the Wi-Fi network
     let peripherals = Peripherals::take().unwrap();
-    if !IGNORE_WIFI {
-        let _wifi = match wifi::connect_wifi(
-            app_config.wifi_ssid,
-            app_config.wifi_psk,
-            peripherals.modem,
-            sysloop,
-        ) {
-            Ok(inner) => {
-                println!("Connected to Wi-Fi network!");
-                inner
-            }
-            Err(err) => {
-                // Red!
-                bail!("Could not connect to Wi-Fi network: {:?}", err)
-            }
-        };
+    let _wifi = match wifi::connect_wifi(
+        app_config.wifi_ssid,
+        app_config.wifi_psk,
+        peripherals.modem,
+        sysloop,
+    ) {
+        Ok(inner) => {
+            println!("Connected to Wi-Fi network!");
+            inner
+        }
+        Err(err) => {
+            // Red!
+            bail!("Could not connect to Wi-Fi network: {:?}", err)
+        }
+    };
 
-        log::info!("Connection closed");
+    log::info!("Wifi initialized");
 
-        // Just to give a chance of our connection to get even the first published message
-        std::thread::sleep(Duration::from_millis(500));
+    // Just to give a chance of our connection to get even the first published message
+    std::thread::sleep(Duration::from_millis(1000));
 
-        server::init_server(shared_data.clone());
-    }
+    log::info!("Starting Server");
+
+    let shared_data_copy = shared_data.clone();
+    let server = server::init_server(shared_data_copy);
 
     // Get the peripherals
     let i2c = peripherals.i2c0;

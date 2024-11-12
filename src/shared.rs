@@ -10,7 +10,7 @@ struct ThreeAxisData {
 
 pub(crate) type SharedDataType = Arc<Mutex<SharedData>>;
 
-const MAX_DATA_POINTS: usize = 100;
+const MAX_DATA_POINTS: usize = 1200;
 
 #[derive(Debug, serde::Serialize, Clone)]
 pub struct SharedData {

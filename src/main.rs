@@ -132,8 +132,6 @@ fn main() -> Result<()> {
     let timer = timer::Timer::new();
 
     loop {
-        let sleep_secs = 2;
-
         match sensor_to_use {
             SensorToUse::MAX3010 => {
                 // let temperature = oximeter.read_temperature().unwrap();
@@ -153,9 +151,6 @@ fn main() -> Result<()> {
                 sensor_to_use = SensorToUse::MPU6050;
             }
             SensorToUse::MPU6050 => {
-                log::info!("Now sleeping for {sleep_secs}s...");
-                std::thread::sleep(Duration::from_secs(sleep_secs));
-
                 log::info!("Reading Accel");
 
                 let accel = match mpu.get_acc() {
@@ -204,6 +199,6 @@ fn main() -> Result<()> {
             }
         }
 
-        sleep(Duration::from_secs(1))
+        sleep(Duration::from_millis(100))
     }
 }

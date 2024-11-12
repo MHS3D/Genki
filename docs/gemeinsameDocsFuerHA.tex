@@ -1,0 +1,140 @@
+% !TeX root = RDT.tex
+\documentclass[a4paper, 11pt]{article}    
+
+\usepackage[ngerman]{babel}                   
+\usepackage[onehalfspacing]{setspace}
+\usepackage[top=2.5cm,bottom=2.5cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
+
+% Load useful packages                        
+\usepackage{amsmath}                            
+\usepackage{xcolor}                             
+\definecolor{custom-blue}{RGB}{0,99,166} 
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, allcolors=custom-blue}
+\usepackage[default]{sourcesanspro}             
+\usepackage[T1]{fontenc}                        
+\usepackage{wrapfig}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{lastpage}
+\usepackage{float}
+\usepackage{tabularx} 
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{tabularray}
+\usepackage{enumitem}
+\usepackage{subcaption}
+
+
+\pagestyle{myheadings}
+\pagestyle{fancy}     
+
+\definecolor{Alto}{rgb}{0.878,0.878,0.878}
+\definecolor{Nobel}{rgb}{0.701,0.701,0.701}
+
+\setlength{\headheight}{30pt}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\fancyhead[C]{}                                 
+\fancyhead[R]{}                      
+\fancyfoot[L]{}
+\fancyfoot[C]{}                 
+\fancyfoot[R]{\thepage/\pageref{LastPage}}
+
+\title{
+    MHS3D
+}
+
+\begin{document}
+
+\maketitle           
+\clearpage
+
+\tableofcontents
+\clearpage
+
+%
+\section{Requirements}
+\begin{enumerate}
+    \item Die Smartwatch soll den angebauten Pulssensor und den MPU6050 Beschleunigungssensor + Gyroskop ansteuern und deren Messdaten abfragen können.
+    \item Die von der Uhr gesammelten Messdaten sollen im laufenden Betrieb an einen PC übertragen werden können. 
+    \item Bewegungsrichtungen sollen live in 3D (als Linie im “Raum”) angezeigt werden.
+    \item Der Puls der letzten 2 Stunden soll als Pulshöhe/Zeit als Liniendiagramm, gefärbt nach Bereichen, altersabhängig (grün bis rot) angezeigt werden.
+    \item Pulsänderungen sollen als farbliche Veränderung des Bewegungsstriches im Raum visualisiert werden.
+\end{enumerate}
+
+Erweiterungsideen:
+\begin{itemize}
+    \item Aufnahme der Daten in Sessions mit Button an der Uhr als Start/Stop
+    \item Interaktive Drehung der Ansicht möglich
+    \item Mapping der Bewegungen in die Raumpläne der HAW
+\end{itemize}
+\clearpage
+
+
+\section{Projektplan}
+\begin{center}
+\begin{tabularx}{\textwidth}{ |c|X|X|X| }
+\hline
+\textbf{KW} & \textbf{Micro} & \textbf{Magic} & \textbf{Kino} \\
+\hline
+\textbf{44}  & Projekt aufsetzen  &  &  \\
+\hline
+45  & Daten per MQTT senden, Format der Daten festlegen   & Recherche Algorithmen & Recherche: Darstellung Was und Wie?  \\
+\hline
+\textbf{46}  &   &  & Mockups erstellen  \\
+\hline
+47  & Herzschrittzähler zum Laufen kriegen   &  & Aufsetzen des Frontends  \\
+\hline
+\textbf{48}  & Done?  &  &  \\
+\hline
+49  &   &  & Testen der Darstellung mit Dummy-Daten \\
+\hline
+\textbf{50}  &   &  &  \\
+\hline
+51  &   &  & Daten von Magic empfangen und darstellen  \\
+\hline
+\textbf{54}  &   &  &  \\
+\hline
+55  &   &  & Testen  \\
+\hline
+\textbf{56}  &   &  &  \\
+\hline
+57  &   &  &  \\
+\hline
+\end{tabularx}
+\end{center}
+\clearpage
+
+\section{Schaltplan}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/verkabelte_Smartwatch.JPEG}
+        \caption{Schaltplan Smartwatch}
+        \label{fig:Schaltplan Smartwatch}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/verkabelte_Smartwatch.JPEG}
+        \caption{verkabelte Smartwatch}
+        \label{fig:verkabelte Smartwatch}
+    \end{subfigure}
+\end{figure}
+
+\clearpage
+
+\section{Datenübertragung}
+Die Datenübertragung findet als HTTP GET Anfrage an den Webserver der Smartwatch statt. Die Smartwatch liefert dann einen JSON String von Datensätzen.
+
+\noindent
+Ein Datensatz enthält einen Timestamp, Acceleration x,y und z Achse, Gyroskop x,y und z Achse sowie ein Pulssensor Messwert in Folgendem Format:
+
+\clearpage
+
+\end{document}

@@ -17,7 +17,7 @@ use esp_idf_svc::{
     mqtt::client::*,
     sys::EspError,
 };
-use shared::SharedData;
+use shared::{SharedData, ThreeAxisData, MAX_DATA_POINTS};
 use shared_bus::BusManagerSimple;
 
 use max3010x::{Led, Max3010x, SampleAveraging};
@@ -131,6 +131,8 @@ fn main() -> Result<()> {
 
     let timer = timer::Timer::new();
 
+    let mut local_acc_vector = Vec::new();
+
     loop {
         match sensor_to_use {
             SensorToUse::MAX3010 => {
@@ -151,11 +153,9 @@ fn main() -> Result<()> {
                 sensor_to_use = SensorToUse::MPU6050;
             }
             SensorToUse::MPU6050 => {
-                log::info!("Reading Accel");
-
                 let accel = match mpu.get_acc() {
                     Ok(acc) => {
-                        log::info!("Received Accel: {:?}", acc);
+                        log::debug!("Received Accel: {:?}", acc);
                         acc
                     }
                     Err(err) => {
@@ -163,42 +163,45 @@ fn main() -> Result<()> {
                         continue;
                     }
                 };
-                let accel_timestamp = timer.elapsed();
+                local_acc_vector.push(ThreeAxisData::new(accel.x, accel.y, accel.z, timer.elapsed()));
 
-                let accel_angles = match mpu.get_acc_angles() {
-                    Ok(angles) => {
-                        log::info!("Received Accel Angles: {:?}", angles);
-                        angles
-                    }
-                    Err(err) => {
-                        log::error!("Error reading accelerometer angles: {:?}", err);
-                        continue;
-                    }
-                };
-                let accel_angles_timestamp = timer.elapsed();
+                // let accel_angles = match mpu.get_acc_angles() {
+                //     Ok(angles) => {
+                //         log::info!("Received Accel Angles: {:?}", angles);
+                //         angles
+                //     }
+                //     Err(err) => {
+                //         log::error!("Error reading accelerometer angles: {:?}", err);
+                //         continue;
+                //     }
+                // };
+                // let accel_angles_timestamp = timer.elapsed();
 
-                let gyrodata = match mpu.get_gyro() {
-                    Ok(gyro) => {
-                        log::info!("Received Gyro: {:?}", gyro);
-                        gyro
-                    }
-                    Err(err) => {
-                        log::error!("Error reading gyroscope: {:?}", err);
-                        continue;
-                    }
-                };
-                let gyro_timestamp = timer.elapsed();
+                // let gyrodata = match mpu.get_gyro() {
+                //     Ok(gyro) => {
+                //         log::info!("Received Gyro: {:?}", gyro);
+                //         gyro
+                //     }
+                //     Err(err) => {
+                //         log::error!("Error reading gyroscope: {:?}", err);
+                //         continue;
+                //     }
+                // };
+                // let gyro_timestamp = timer.elapsed();
 
-                {
-                    let mut shared_data = shared_data.lock().unwrap();
-                    shared_data.add_accel(accel.x, accel.y, accel.z, accel_timestamp);
-                    shared_data.add_gyro(gyrodata.x, gyrodata.y, gyrodata.z, gyro_timestamp);
+                if local_acc_vector.len() % 100 == 0 {
+                    log::info!("Len is at: {}", local_acc_vector.len());
                 }
 
-                sensor_to_use = SensorToUse::MAX3010;
+                if local_acc_vector.len() >= MAX_DATA_POINTS {
+                    log::info!("Pushing new data to server");
+                    let mut shared_data = shared_data.lock().unwrap();
+                    shared_data.switch_acc_vec(local_acc_vector);
+                    local_acc_vector = Vec::new();
+                }
+
+                sensor_to_use = SensorToUse::MPU6050;
             }
         }
-
-        sleep(Duration::from_millis(100))
     }
 }

@@ -28,7 +28,7 @@ mod shared;
 mod timer;
 mod wifi;
 
-const BAUDRATE: u32 = 100;
+const BAUDRATE: u32 = 115200;
 
 /// This configuration is picked up at compile time by `build.rs` from the
 /// file `cfg.toml`.
@@ -132,6 +132,7 @@ fn main() -> Result<()> {
     let timer = timer::Timer::new();
 
     let mut local_acc_vector = Vec::new();
+    let mut local_gyro_vector = Vec::new();
 
     loop {
         match sensor_to_use {
@@ -155,7 +156,6 @@ fn main() -> Result<()> {
             SensorToUse::MPU6050 => {
                 let accel = match mpu.get_acc() {
                     Ok(acc) => {
-                        log::debug!("Received Accel: {:?}", acc);
                         acc
                     }
                     Err(err) => {
@@ -177,17 +177,16 @@ fn main() -> Result<()> {
                 // };
                 // let accel_angles_timestamp = timer.elapsed();
 
-                // let gyrodata = match mpu.get_gyro() {
-                //     Ok(gyro) => {
-                //         log::info!("Received Gyro: {:?}", gyro);
-                //         gyro
-                //     }
-                //     Err(err) => {
-                //         log::error!("Error reading gyroscope: {:?}", err);
-                //         continue;
-                //     }
-                // };
-                // let gyro_timestamp = timer.elapsed();
+                let gyrodata = match mpu.get_gyro() {
+                    Ok(gyro) => {
+                        gyro
+                    }
+                    Err(err) => {
+                        log::error!("Error reading gyroscope: {:?}", err);
+                        continue;
+                    }
+                };
+                local_gyro_vector.push(ThreeAxisData::new(gyrodata.x, gyrodata.y, gyrodata.z, timer.elapsed()));
 
                 if local_acc_vector.len() % 100 == 0 {
                     log::info!("Len is at: {}", local_acc_vector.len());
@@ -197,7 +196,9 @@ fn main() -> Result<()> {
                     log::info!("Pushing new data to server");
                     let mut shared_data = shared_data.lock().unwrap();
                     shared_data.switch_acc_vec(local_acc_vector);
+                    shared_data.switch_gyro_vec(local_gyro_vector);
                     local_acc_vector = Vec::new();
+                    local_gyro_vector = Vec::new();
                 }
 
                 sensor_to_use = SensorToUse::MPU6050;

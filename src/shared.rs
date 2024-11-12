@@ -10,7 +10,7 @@ pub struct ThreeAxisData {
 
 pub(crate) type SharedDataType = Arc<Mutex<SharedData>>;
 
-pub const MAX_DATA_POINTS: usize = 300;
+pub const MAX_DATA_POINTS: usize = 1200;
 
 #[derive(Debug, serde::Serialize, Clone)]
 pub struct SharedData {
@@ -28,6 +28,10 @@ impl SharedData {
 
     pub fn switch_acc_vec(&mut self, vec: Vec<ThreeAxisData>) {
         self.accel = vec;
+    }
+
+    pub fn switch_gyro_vec(&mut self, vec: Vec<ThreeAxisData>) {
+        self.gyro = vec;
     }
 }
 

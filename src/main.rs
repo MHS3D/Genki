@@ -131,9 +131,6 @@ fn main() -> Result<()> {
 
     let timer = timer::Timer::new();
 
-    let mut local_acc_vector = Vec::new();
-    let mut local_gyro_vector = Vec::new();
-
     loop {
         match sensor_to_use {
             SensorToUse::MAX3010 => {
@@ -163,8 +160,7 @@ fn main() -> Result<()> {
                         continue;
                     }
                 };
-                local_acc_vector.push(ThreeAxisData::new(accel.x, accel.y, accel.z, timer.elapsed()));
-
+                
                 // let accel_angles = match mpu.get_acc_angles() {
                 //     Ok(angles) => {
                 //         log::info!("Received Accel Angles: {:?}", angles);
@@ -186,23 +182,17 @@ fn main() -> Result<()> {
                         continue;
                     }
                 };
-                local_gyro_vector.push(ThreeAxisData::new(gyrodata.x, gyrodata.y, gyrodata.z, timer.elapsed()));
 
-                if local_acc_vector.len() % 100 == 0 {
-                    log::info!("Len is at: {}", local_acc_vector.len());
-                }
-
-                if local_acc_vector.len() >= MAX_DATA_POINTS {
-                    log::info!("Pushing new data to server");
+                {
                     let mut shared_data = shared_data.lock().unwrap();
-                    shared_data.switch_acc_vec(local_acc_vector);
-                    shared_data.switch_gyro_vec(local_gyro_vector);
-                    local_acc_vector = Vec::new();
-                    local_gyro_vector = Vec::new();
+                    let timestamp = timer.elapsed();
+                    shared_data.add_accel(accel.x, accel.y, accel.z, timestamp);
+                    shared_data.add_gyro(gyrodata.x, gyrodata.y, gyrodata.z, timestamp);
                 }
 
                 sensor_to_use = SensorToUse::MPU6050;
             }
         }
+        sleep(Duration::from_millis(100));
     }
 }

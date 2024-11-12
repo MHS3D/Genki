@@ -43,8 +43,6 @@ impl SharedData {
     }
 
     pub fn add_gyro(&mut self, x: f32, y: f32, z: f32, timestamp: f64) {
-        log::info!("Point: {}", self.gyro.len());
-
         if self.gyro.len() >= MAX_DATA_POINTS {
             self.gyro.remove(0);
         }

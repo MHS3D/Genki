@@ -10,6 +10,6 @@ impl Timer {
     }
 
     pub fn elapsed(&self) -> f64 {
-        self.start.elapsed().as_millis_f64()
+        self.start.elapsed().as_secs_f64()
     }
 }

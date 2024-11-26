@@ -18,3 +18,10 @@
 **/*.lb
 **/*.fdb_latexmk
 **/*.synctex.gz
+
+## Python:
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+src_python/daten.json

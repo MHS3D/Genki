@@ -4,8 +4,8 @@ import http_client
 
 TEST = True # False wenn der Server der Uhr tatsächlich läuft
 
-HOST_SERVER_UHR = "127.0.0.1"  # Server-Host Uhr
-PORT_SERVER_UHR = 8081 # Portnummer
+HOST_SERVER_UHR = "192.168.119.26"  # Server-Host Uhr
+PORT_SERVER_UHR = 80 # Portnummer
 
 URL_PATH_CLIENT = "http://"+HOST_SERVER_UHR+":"+str(PORT_SERVER_UHR)+"/"
 

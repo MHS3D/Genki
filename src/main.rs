@@ -193,6 +193,6 @@ fn main() -> Result<()> {
                 sensor_to_use = SensorToUse::MPU6050;
             }
         }
-        sleep(Duration::from_millis(100));
+        sleep(Duration::from_millis(10));
     }
 }

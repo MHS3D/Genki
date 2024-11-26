@@ -29,6 +29,12 @@ mod timer;
 mod wifi;
 
 const BAUDRATE: u32 = 115200;
+const AVG_ACC_X: f32 = -0.04;
+const AVG_ACC_Y: f32 = 0.02;
+const AVG_ACC_Z: f32 = 0.89;
+const AVG_GYRO_X: f32 = -0.03;
+const AVG_GYRO_Y: f32 = 0.02;
+const AVG_GYRO_Z: f32 = 0.02;
 
 /// This configuration is picked up at compile time by `build.rs` from the
 /// file `cfg.toml`.
@@ -177,8 +183,8 @@ fn main() -> Result<()> {
                 {
                     let mut shared_data = shared_data.lock().unwrap();
                     let timestamp = timer.elapsed();
-                    shared_data.add_accel(accel.x, accel.y, accel.z, timestamp);
-                    shared_data.add_gyro(gyrodata.x, gyrodata.y, gyrodata.z, timestamp);
+                    shared_data.add_accel(accel.x-AVG_ACC_X, accel.y-AVG_ACC_Y, accel.z-AVG_ACC_Z, timestamp);
+                    shared_data.add_gyro(gyrodata.x-AVG_GYRO_X, gyrodata.y-AVG_GYRO_Y, gyrodata.z-AVG_GYRO_Z, timestamp);
                 }
 
                 sensor_to_use = SensorToUse::MPU6050;

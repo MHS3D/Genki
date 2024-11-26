@@ -2,15 +2,15 @@ import threading
 import http_server
 import http_client
 
-TEST = True # False wenn der Server der Uhr tatsächlich läuft
+TEST = False # False wenn der Server der Uhr tatsächlich läuft
 
 HOST_SERVER_UHR = "192.168.119.26"  # Server-Host Uhr
 PORT_SERVER_UHR = 80 # Portnummer
 
-URL_PATH_CLIENT = "http://"+HOST_SERVER_UHR+":"+str(PORT_SERVER_UHR)+"/"
+URL_PATH_CLIENT = f"http://{HOST_SERVER_UHR}:{PORT_SERVER_UHR}/"
 
 HOST_SERVER = "127.0.0.1"  # Server-Host
-PORT_SERVER = 8080 # Portnummer
+PORT_SERVER = 80 # Portnummer
 
 if __name__ == "__main__":
     if TEST:

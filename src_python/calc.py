@@ -27,6 +27,16 @@ def iirFilter(arr, alpha):
         dst.append(alpha*arr[j] + (1-alpha)*old_arr[j+1])
     return np.array(dst)
 
+def iirFilter2(arr, alpha):
+    old_arr = arr.copy()
+    length = len(arr[:,0])
+    dst = arr.copy()
+    for j in range(0,length-1):
+        dst[j][0] = (alpha*arr[j][0] + (1-alpha)*old_arr[j+1][0])
+        dst[j][1] = (alpha*arr[j][1] + (1-alpha)*old_arr[j+1][1])
+        dst[j][2] = (alpha*arr[j][2] + (1-alpha)*old_arr[j+1][2])
+    return dst[:len(dst)-1,:]
+
 ##########################################################################################
 ##########################################################################################
 ##########################################################################################
@@ -78,6 +88,15 @@ def rotate_to_world(acceleration, angle):
     # Gesamte Rotationsmatrix
     R = Rz @ Ry @ Rx
     return R @ acceleration
+
+def delete_mean(arr):
+    xmean = np.mean(arr[:,0])
+    arr[:,0] = arr[:,0]-xmean
+    xmean = np.mean(acc[:,1])
+    arr[:,1] = arr[:,1]-xmean
+    xmean = np.mean(acc[:,2])
+    arr[:,2] = arr[:,2]-xmean
+    return arr
 
 def preparing_for_plot(accel, gyro):
     global LAST_TIME
@@ -163,23 +182,22 @@ def read_values(data):
 '''
 acc, gyro = test_values.getTestAcceleration(6)
 
-xmean = np.mean(acc[:,0])
-acc[:,0] = acc[:,0] - xmean
-ymean = np.mean(acc[:,1])
-acc[:,1] = acc[:,1] - ymean
-zmean = np.mean(acc[:,2])
-acc[:,2] = acc[:,2] - zmean
+alpha = 0.5
+acc = delete_mean(acc)
 
-xmean = np.mean(gyro[:,0])
-gyro[:,0] = gyro[:,0] - xmean
-ymean = np.mean(gyro[:,1])
-gyro[:,1] = gyro[:,1] - ymean
-zmean = np.mean(gyro[:,2])
-gyro[:,2] = gyro[:,2] - zmean
+FILTER_COUNT = 10
 
+for i in range(FILTER_COUNT):
+    acc = iirFilter2(acc, alpha)
 
-plot.plotWithTime(acc[:,0],acc[:,1],acc[:,2],acc[:,3])
-x,y,z,t = preparing_for_plot(acc, gyro)
+gyro = delete_mean(gyro)
+
+for i in range(FILTER_COUNT):
+    gyro = iirFilter2(gyro, alpha)
+
+snip = 50
+plot.plotWithTime(acc[snip:,0],acc[snip:,1],acc[snip:,2],acc[snip:,3])
+x,y,z,t = preparing_for_plot(acc[snip:,:], gyro[snip:,:])
 if PLOT3D:
     plot.plot3D(x,y,z)
 else:

@@ -9,7 +9,8 @@ path_treppehoch = "Treppehoch.json"
 path_trepperunter = "Trepperunter.json"
 path_roh_nur_liegend = "roh_nur_liegend.json"
 path_roh_handbewegung_treppen = "roh_handbewegung treppen.json"
-path_roh_einfach_laufend = "roh_einfach_laufend.json"
+path_roh_liegend = "roh_cali_faster_liegend.json"
+path_roh_cali_laufen_u_sidesteps = "roh_cali_laufen_u_sidesteps.json"
 
 def load_json(path):
     data = None
@@ -185,7 +186,10 @@ def getTestAcceleration(choose):
             json_data = load_json(path_roh_nur_liegend)
             values = read_values(json_data)
         case 6:
-            json_data = load_json(path_roh_einfach_laufend)
+            json_data = load_json(path_roh_liegend)
+            values = read_values(json_data)
+        case 7:
+            json_data = load_json(path_roh_cali_laufen_u_sidesteps)
             values = read_values(json_data)
         case 99:
             json_data = load_json(path_treppehoch)

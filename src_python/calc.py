@@ -38,13 +38,14 @@ def update_position(acceleration, gyro, dt):
     ANGLE += gyro * dt  # Winkel in Rad berechnen
 
     # Komplementärfilter anwenden (Nutzung von Beschleunigung und Gyro zur Stabilisierung)
+    '''
     roll_acc, pitch_acc = calc_roll_pitch(acceleration)
     ANGLE[0] = ALPHA * (ANGLE[0]) + (1 - ALPHA) * roll_acc
     ANGLE[1] = ALPHA * (ANGLE[1]) + (1 - ALPHA) * pitch_acc
-
+    '''
     # Beschleunigungswerte in Weltkoordinaten transformieren (Rotation basierend auf Winkel)
     acc_world = rotate_to_world(acceleration, ANGLE)
-    acc_world -= np.array([0.0,0.0,G])
+    #acc_world -= np.array([0.0,0.0,G])
 
     # Integration der Geschwindigkeit und Position (Euler-Integration)
     VELOCITY += acc_world * dt
@@ -80,11 +81,12 @@ def rotate_to_world(acceleration, angle):
 
 def preparing_for_plot(accel, gyro):
     global LAST_TIME
+    LAST_TIME = accel[0][3]-0.01
     route_x = []
     route_y = []
     route_z = []
     times = []
-    dt = 0.1
+    dt = 0.01
     for i in range(len(accel)):
         dt = accel[i][3]-LAST_TIME
         LAST_TIME = accel[i][3]
@@ -99,16 +101,33 @@ def preparing_for_plot(accel, gyro):
     times = np.array(times)
     return route_x, route_y, route_z, times
 
+def preparing_for_plot_2(pos):
+    route_x = []
+    route_y = []
+    route_z = []
+    times = []
+    for i in range(len(pos)):
+        route_x.append(pos[i][0])
+        route_y.append(pos[i][1])
+        route_z.append(pos[i][2])
+        times.append(pos[i][3])
+    route_x = np.array(route_x)
+    route_y = np.array(route_y)
+    route_z = np.array(route_z)
+    times = np.array(times)
+    return route_x, route_y, route_z, times
+
 def preparing_json(data, accel, gyro):
     global LAST_TIME, COUNT_DATA
-    dt = 0.1
+    LAST_TIME = accel[0][3]-0.01
+    dt = 0.01
     COUNT_DATA = len(data)
     for i in range(len(accel)):
         if accel[i][3] >= LAST_TIME:
             dt = accel[i][3]-LAST_TIME
             LAST_TIME = accel[i][3]
             position, velocity, angle = update_position(accel[i][:3], gyro[i][:3], dt)
-            neue_daten = [{COUNT_DATA:{"x": position[0],"y": position[1],"z": position[2],"timestamp": accel[i][3]}}]
+            neue_daten = [{"x": position[0],"y": position[1],"z": position[2],"timestamp": accel[i][3]}]
             data.extend(neue_daten)
             COUNT_DATA += 1
     return data
@@ -141,11 +160,28 @@ def read_values(data):
 ##########################################################################################
 ##########################################################################################
 ##########################################################################################
-
 '''
-x,y,z,t = preparing_for_plot(accel, gyro)
+acc, gyro = test_values.getTestAcceleration(6)
+
+xmean = np.mean(acc[:,0])
+acc[:,0] = acc[:,0] - xmean
+ymean = np.mean(acc[:,1])
+acc[:,1] = acc[:,1] - ymean
+zmean = np.mean(acc[:,2])
+acc[:,2] = acc[:,2] - zmean
+
+xmean = np.mean(gyro[:,0])
+gyro[:,0] = gyro[:,0] - xmean
+ymean = np.mean(gyro[:,1])
+gyro[:,1] = gyro[:,1] - ymean
+zmean = np.mean(gyro[:,2])
+gyro[:,2] = gyro[:,2] - zmean
+
+
+plot.plotWithTime(acc[:,0],acc[:,1],acc[:,2],acc[:,3])
+x,y,z,t = preparing_for_plot(acc, gyro)
 if PLOT3D:
     plot.plot3D(x,y,z)
 else:
     plot.plotWithTime(x, y, z, t)
-''' 
+'''

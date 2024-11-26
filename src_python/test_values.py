@@ -7,12 +7,30 @@ path_liegend = "liegend.json"
 path_laufen = "laufen.json"
 path_treppehoch = "Treppehoch.json"
 path_trepperunter = "Trepperunter.json"
+path_roh_nur_liegend = "roh_nur_liegend.json"
+path_roh_handbewegung_treppen = "roh_handbewegung treppen.json"
+path_roh_einfach_laufend = "roh_einfach_laufend.json"
 
 def load_json(path):
     data = None
     with open(path, 'r') as file:
         data = json.load(file)
     return data
+
+def read_values_position(data):
+    pos_list = []
+    count = 0
+    length = len(data)
+    for d in data:
+        print(d)
+        x = d[count]['x']
+        y = d[count]["y"]
+        z = d[count]["z"]
+        t = d[count]["timestamp"]
+        pos_list.append(np.array([x,y,z,t]))
+        count += 1
+    return [pos_list,[]]
+
 
 def read_values(data):
     accel = data["accel"]
@@ -162,6 +180,12 @@ def getTestAcceleration(choose):
             values = read_values(json_data)
         case 4:
             json_data = load_json(path_trepperunter)
+            values = read_values(json_data)
+        case 5:
+            json_data = load_json(path_roh_nur_liegend)
+            values = read_values(json_data)
+        case 6:
+            json_data = load_json(path_roh_einfach_laufend)
             values = read_values(json_data)
         case 99:
             json_data = load_json(path_treppehoch)

@@ -10,7 +10,7 @@ PORT_SERVER_UHR = 80 # Portnummer
 URL_PATH_CLIENT = f"http://{HOST_SERVER_UHR}:{PORT_SERVER_UHR}/"
 
 HOST_SERVER = "127.0.0.1"  # Server-Host
-PORT_SERVER = 80 # Portnummer
+PORT_SERVER = 1234 # Portnummer
 
 if __name__ == "__main__":
     if TEST:

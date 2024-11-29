@@ -11,15 +11,17 @@ import json
 G = 0.981
 ALPHA = 0.98 # Konstante für den Komplementärfilter
 # Initialisierungen
-POSITION = np.array([0.0, 0.0, 0.0])  # Startposition (x, y, z)
-VELOCITY = np.array([0.0, 0.0, 0.0])  # Anfangsgeschwindigkeit (x, y, z)
-ANGLE = np.array([0.0, 0.0, 0.0])     # Orientierung (Roll, Pitch, Yaw)
+POSITION = np.zeros(3)  # Startposition (x, y, z)
+VELOCITY = np.zeros(3)  # Anfangsgeschwindigkeit (x, y, z)
+ANGLE = np.zeros(3)    # Orientierung (Roll, Pitch, Yaw)
+DRIFT = np.zeros(3)     # Startwert für den Drift des Gyroskops
+
 LAST_TIME = 0
 JSON_DATA = []
 COUNT_DATA = 0
-P = np.eye(3) * 0.0001  # Schätzfehler-Kovarianzmatrix für Winkel (z.B. Roll, Pitch, Yaw)
+P = np.eye(12) * 0.0001  # Schätzfehler-Kovarianzmatrix für Winkel (z.B. Roll, Pitch, Yaw)
 R = np.eye(3) * 0.0001  # Messrauschen-Kovarianz (Schätzung der Messunsicherheit)
-Q = np.eye(3) * 0.0001  # Prozessrauschen (Schätzung der Modellunsicherheit)
+Q = np.eye(12) * 0.0001  # Prozessrauschen (Schätzung der Modellunsicherheit)
 
 
 def low_pass_filter(data, alpha, count):
@@ -54,19 +56,24 @@ def low_pass_filter(data, alpha, count):
 ##########################################################################################
 
 def update_position(acceleration, gyro, dt):
-    global POSITION, VELOCITY, ANGLE, G, P, R, Q
+    global POSITION, VELOCITY, ANGLE, DRIFT, P, Q, R, G
 
     # Winkelgeschwindigkeit integrieren (Gyroskop)
-    ANGLE = kalman_filter(gyro, dt)  # Winkel in Rad berechnen
+    ANGLE += gyro * dt # Winkel in Rad berechnen
 
     # Beschleunigungswerte in Weltkoordinaten transformieren (Rotation basierend auf Winkel)
+    #acceleration -= np.array([0.0,0.0,G])
     acc_world = rotate_to_world(acceleration, ANGLE)
-    #acc_world -= np.array([0.0,0.0,G])
+    
+
+    if np.linalg.norm(VELOCITY) < 0.01:  # Wenn Geschwindigkeit fast null ist, verwenden wir ZUPT
+        #print("ZUPT-Korrektur angewendet: Geschwindigkeit auf Null gesetzt")
+        VELOCITY = np.zeros(3)  # Geschwindigkeit auf Null setzen
 
     # Integration der Geschwindigkeit und Position (Euler-Integration)
     VELOCITY += acc_world * dt
     POSITION += VELOCITY * dt
-
+    POSITION, VELOCITY, ANGLE, P = kalman_filter_update(gyro, dt)
     return POSITION, VELOCITY, ANGLE
 
 def rotate_to_world(acceleration, angle):
@@ -89,24 +96,39 @@ def rotate_to_world(acceleration, angle):
     R = Rz @ Ry @ Rx
     return R @ acceleration
 
-def kalman_filter(gyro, dt):
-    global ANGLE, P, Q
-    
-    # Vorhersage (Prediction Step)
-    # Angenommene Winkeländerung aufgrund des Gyroskops (nur auf Gyroskopdaten basierend)
-    predicted_angle = ANGLE + gyro * dt
-    
-    # Vorhersage der Schätzfehler-Kovarianz
-    F = np.eye(3)  # Zustandetransitionsmatrix (hier als Identitätsmatrix)
-    P = F @ P @ F.T + Q  # Schätzfehler-Kovarianz aktualisieren
-    
-    # Da wir keine Messung (angle_meas) haben, gibt es keinen "Measurement Update"
-    # Der Kalman-Filter wird hier ohne externes Signal betrieben.
-    
-    # Korrektur der Schätzung durch Prozessrauschen und Schätzfehler
-    ANGLE = predicted_angle  # Die Schätzung bleibt die gleiche, aber die Kovarianz wird angepasst
-    P = P  # Keine externe Messung zur weiteren Korrektur, P bleibt unverändert
-    return ANGLE
+def kalman_filter_update(gyro, dt):
+    global POSITION, VELOCITY, ANGLE, DRIFT, P, R, Q, P_update
+    # Vorhersage der nächsten Zustände
+    # Zustand: [Position, Geschwindigkeit, Winkel, Drift]
+    dim = 3
+    x_pred = np.hstack([POSITION, VELOCITY, ANGLE, DRIFT])  # Vektor des aktuellen Zustands
+    length = len(x_pred)
+    F = np.eye(length) #* dt  # Übergangsmatrix (Identität, da wir nur eine einfache Integration haben)
+
+    F[0:3, 3:6] = np.eye(dim) * dt  # Geschwindigkeit beeinflusst die Position
+    F[6:9, 9:12] = np.eye(dim) * dt  # Drift beeinflusst den Winkel
+    # Vorhersage des neuen Zustands
+    x_pred = F @ x_pred
+    # Vorhersage der Kovarianz
+    P_pred = F @ P @ F.T + Q
+
+    # Messung: Gyroskop (Winkelgeschwindigkeit)
+    z = gyro  # Gyroskopmessungen
+
+    # Messmodell: Der aktuelle Winkel sollte sich durch die Geschwindigkeit des Gyroskops ändern
+    H = np.zeros((dim, length))  # Messmatrix
+
+    # Kalman-Gewicht
+    S = H @ P_pred @ H.T + R  # Messunsicherheit
+    K = P_pred @ H.T @ np.linalg.inv(S)  # Kalman-Verstärkung
+
+    # Update des Zustands
+    x_update = x_pred + K @ (z - H @ x_pred)
+
+    # Update der Schätzfehler-Kovarianz
+    P_update = (np.eye(12) - K @ H) @ P_pred
+
+    return x_update[:dim], x_update[dim:dim*2], x_update[dim*2:dim*3], P_update
 
 def delete_mean(arr):
     arr[:,0] = arr[:,0]-arr[0][0]
@@ -115,18 +137,14 @@ def delete_mean(arr):
     #arr[:,3] = arr[:,3]-arr[0][3]
     return arr
 
-def delete_mean_2(arr):
-    arr[:,0] = arr[:,0]-np.mean(arr[:,0])
-    arr[:,1] = arr[:,1]-np.mean(arr[:,1])
-    arr[:,2] = arr[:,2]-np.mean(arr[:,2])
-    #arr[:,3] = arr[:,3]-arr[0][3]
-    return arr
-
 def calc_delta_time(times):
     t_sum = 0
+    count = 0
     for i in range(len(times)-1):
-        t_sum += (times[i+1]-times[i])
-    return (t_sum/(len(times)-1))
+        if times[i+1] > times[i]:
+            t_sum += (times[i+1]-times[i])
+            count += 1
+    return (t_sum/count)
 
 def preparing_for_plot(accel, gyro):
     global LAST_TIME

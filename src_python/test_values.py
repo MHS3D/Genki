@@ -44,15 +44,15 @@ def read_values(data):
     acc_list = []
     gyro_list = []
     for i in range(length):
-        x = round(accel[i]["x"],2)
-        y = round(accel[i]["y"],2)
-        z = round(accel[i]["z"],2)
-        t = round(accel[i]["timestamp"],2)
+        x = accel[i]["x"]
+        y = accel[i]["y"]
+        z = accel[i]["z"]
+        t = accel[i]["timestamp"]
         acc_list.append(np.array([x,y,z,t]))
-        x = round(gyro[i]["x"],2)
-        y = round(gyro[i]["y"],2)
-        z = round(gyro[i]["z"],2)
-        t = round(gyro[i]["timestamp"],2)
+        x = gyro[i]["x"]
+        y = gyro[i]["y"]
+        z = gyro[i]["z"]
+        t = gyro[i]["timestamp"]
         gyro_list.append(np.array([x,y,z,t]))
     acc_list = np.array(acc_list)
     gyro_list = np.array(gyro_list)

@@ -52,6 +52,21 @@ def plotWithTime(x,y,z,t):
     plt.plot(t,z, "red")
     plt.show()
 
+def plotWithTime2(x,y,z,t,x1,y1,z1,t1):
+    plt.ylabel("x")
+    plt.xlabel("time")
+    plt.plot(t,x, "blue")
+    plt.plot(t1,x1, "red")
+    plt.show()
+    plt.ylabel("y")
+    plt.plot(t,y, "blue")
+    plt.plot(t1,y1, "red")
+    plt.show()
+    plt.ylabel("z")
+    plt.plot(t,z, "blue")
+    plt.plot(t1,z1, "red")
+    plt.show()
+
 def plotSingle(x,t):
     plt.ylabel("value")
     plt.xlabel("time")

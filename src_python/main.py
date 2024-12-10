@@ -10,6 +10,7 @@ PORT_SERVER_UHR = 8081 # Portnummer
 URL_PATH_CLIENT = "http://"+HOST_SERVER_UHR+":"+str(PORT_SERVER_UHR)+"/"
 
 HOST_SERVER = "127.0.0.1"  # Server-Host
+
 PORT_SERVER = 8080 # Portnummer
 
 if __name__ == "__main__":

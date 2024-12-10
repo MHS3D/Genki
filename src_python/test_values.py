@@ -7,12 +7,31 @@ path_liegend = "liegend.json"
 path_laufen = "laufen.json"
 path_treppehoch = "Treppehoch.json"
 path_trepperunter = "Trepperunter.json"
+path_roh_nur_liegend = "roh_nur_liegend.json"
+path_roh_handbewegung_treppen = "roh_handbewegung treppen.json"
+path_roh_liegend = "roh_cali_faster_liegend.json"
+path_roh_cali_laufen_u_sidesteps = "roh_cali_laufen_u_sidesteps.json"
 
 def load_json(path):
     data = None
     with open(path, 'r') as file:
         data = json.load(file)
     return data
+
+def read_values_position(data):
+    pos_list = []
+    count = 0
+    length = len(data)
+    for d in data:
+        print(d)
+        x = d[count]['x']
+        y = d[count]["y"]
+        z = d[count]["z"]
+        t = d[count]["timestamp"]
+        pos_list.append(np.array([x,y,z,t]))
+        count += 1
+    return [pos_list,[]]
+
 
 def read_values(data):
     accel = data["accel"]
@@ -25,15 +44,15 @@ def read_values(data):
     acc_list = []
     gyro_list = []
     for i in range(length):
-        x = round(accel[i]["x"],2)
-        y = round(accel[i]["y"],2)
-        z = round(accel[i]["z"],2)
-        t = round(accel[i]["timestamp"],2)
+        x = accel[i]["x"]
+        y = accel[i]["y"]
+        z = accel[i]["z"]
+        t = accel[i]["timestamp"]
         acc_list.append(np.array([x,y,z,t]))
-        x = round(gyro[i]["x"],2)
-        y = round(gyro[i]["y"],2)
-        z = round(gyro[i]["z"],2)
-        t = round(gyro[i]["timestamp"],2)
+        x = gyro[i]["x"]
+        y = gyro[i]["y"]
+        z = gyro[i]["z"]
+        t = gyro[i]["timestamp"]
         gyro_list.append(np.array([x,y,z,t]))
     acc_list = np.array(acc_list)
     gyro_list = np.array(gyro_list)
@@ -162,6 +181,15 @@ def getTestAcceleration(choose):
             values = read_values(json_data)
         case 4:
             json_data = load_json(path_trepperunter)
+            values = read_values(json_data)
+        case 5:
+            json_data = load_json(path_roh_nur_liegend)
+            values = read_values(json_data)
+        case 6:
+            json_data = load_json(path_roh_liegend)
+            values = read_values(json_data)
+        case 7:
+            json_data = load_json(path_roh_cali_laufen_u_sidesteps)
             values = read_values(json_data)
         case 99:
             json_data = load_json(path_treppehoch)

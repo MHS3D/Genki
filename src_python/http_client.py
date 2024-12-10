@@ -7,6 +7,8 @@ import time
 JSON_DATA = []
 RUNNING = True
 INTERVAL = 1 #seconds
+ALPHA = 0.85
+COUNT_FILTER = 100
 
 class SimpleHTTPRequest():
     # GET-Anfragen behandeln
@@ -23,6 +25,10 @@ class SimpleHTTPRequest():
                 string_content = byte_content.decode('utf-8') # Bytes zu String umwandeln (UTF-8 Dekodierung)
                 json_content = json.loads(string_content) # String zu JSON umwandeln
                 accel, gyro = calc.read_values(json_content)
+                accel = calc.delete_mean(accel)
+                accel = calc.low_pass_filter(accel, ALPHA, COUNT_FILTER)
+                gyro = calc.delete_mean(gyro)
+                gyro = calc.low_pass_filter(gyro, ALPHA, COUNT_FILTER)
                 JSON_DATA = calc.preparing_json(JSON_DATA, accel, gyro)
                 # JSON-Daten in eine Datei schreiben
                 with open("daten.json", "w", encoding="utf-8") as file:

@@ -53,7 +53,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 # Server-Konfiguration
 def run_server():
-    global HOST, PORT # ?!? Warum global?
+    global HOST, PORT
     server = HTTPServer((HOST, PORT), SimpleHTTPRequestHandler)
     print(f"Server läuft auf http://{HOST}:{PORT}")
     server.serve_forever()  # Server starten

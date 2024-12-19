@@ -60,15 +60,17 @@
 %
 \section{Requirements}
 \begin{enumerate}
-    \item Die Smartwatch soll den angebauten Pulssensor und den MPU6050 Beschleunigungssensor + Gyroskop ansteuern und deren Messdaten abfragen können.
+    \item Die Smartwatch soll den MPU6050 Beschleunigungssensor + Gyroskop ansteuern und deren Messdaten abfragen können.
     \item Die von der Uhr gesammelten Messdaten sollen im laufenden Betrieb an einen PC übertragen werden können.
     \item Bewegungsrichtungen sollen live in 3D (als Linie im “Raum”) angezeigt werden.
-    \item Der Puls der letzten 2 Stunden soll als Pulshöhe/Zeit als Liniendiagramm, gefärbt nach Bereichen, altersabhängig (grün bis rot) angezeigt werden.
-    \item Pulsänderungen sollen als farbliche Veränderung des Bewegungsstriches im Raum visualisiert werden.
+    \item Das Bewegungstracking der letzten 2 Stunden soll während des Betriebs gespeichert und dargestellt werden können.
+
 \end{enumerate}
 
 Erweiterungsideen:
 \begin{itemize}
+    \item Der Puls des Trägers  wird als Liniendiagramm, gefärbt nach Bereichen, altersabhängig (grün bis rot) angezeigt werden.
+    \item Pulsänderungen sollen als farbliche Veränderung des Bewegungsstriches im Raum visualisiert werden.
     \item Aufnahme der Daten in Sessions mit Button an der Uhr als Start/Stop
     \item Interaktive Drehung der Ansicht möglich
     \item Mapping der Bewegungen in die Raumpläne der HAW
@@ -103,13 +105,13 @@ Ein grober Zeitplan der Recherche und Umsetzung des Projektplans den wir zu Anfa
         \hline
         \textbf{44} & Projekt aufsetzen                                 &                       &                                          \\
         \hline
-        45          & Daten per MQTT senden, Format der Daten festlegen & Recherche Algorithmen & Recherche: Darstellung Was und Wie?      \\
+        45          & Daten per HTTP senden, Format der Daten festlegen & Recherche Algorithmen & Recherche: Darstellung Was und Wie?      \\
         \hline
         \textbf{46} &                                                   &                       & Mockups erstellen                        \\
         \hline
         47          & Herzschrittzähler zum Laufen kriegen              &                       & Aufsetzen des Frontends                  \\
         \hline
-        \textbf{48} & Done?                                             &                       &                                          \\
+        \textbf{48} & Done                                              &                       &                                          \\
         \hline
         49          &                                                   &                       & Testen der Darstellung mit Dummy-Daten   \\
         \hline
@@ -153,6 +155,9 @@ An den Mikrocontroller haben wir einen Puls-Sensor, den MPU-6050, ein 3-Achsen G
 
 \noindent Zur vereinfachten Verkabelung sind zwei Steckleisten auf der Uhr befestigt über die einmal die Stromversorgung und einmal die I2C Kabel gesteckt wurden.
 
+\subsection{Stromverbrauch der Uhr:}
+der Akku umfasst 700 mAh, der MPU6050 benötigt 4 mA  und der ESP32C6 im Worst Case 240mA da wir wlan für http benötigen.
+Daraus ergibt sich bei unserer Verwendung für die Uhr eine Laufzeit von 2,8h.
 
 \clearpage
 

@@ -129,6 +129,45 @@ Ein grober Zeitplan der Recherche und Umsetzung des Projektplans den wir zu Anfa
         \hline
     \end{tabularx}
 \end{center}
+\subsubsection{Kino: Beschreibung des Vorgehens:}
+
+Für das Erstellen der Mockups wird moqup genutzt (oder @Lara?)
+Mockupbild einfügen und beschreiben...\newline
+\newline
+Es gibt ein Dashboard. Auf dieser Übersicht sollen Puls und 3D-Position nebeneinander in jeweils eigenen Blöcken dargestellt werden.
+Zusätzlich werden Werte wie bisher maximaler Puls dargestellt....\newline
+\newline
+Für die 3D-Darstellung wird die JavaScript-Bibliothek THREE.js ausgewählt.
+(evt. Paper raussuchen warum und was gut ist)\newline
+\newline
+Beschreibung JavaScript-Kram: \newline
+scriptThreeBib\_copy.js: beinhaltet den Aufbau der Szene der 3D-Darstellung der Bewegung \newline
+scriptHeartThreeBib.js: beinhaltet den Aufbau der Szene der Pulsdarstellung \newline
+HelperClass.js: beinhaltet Hilfsmethoden: zum Verarbeiten der Daten, zeichnen der Koordinatenachsen, erstellen der Labels, ermitteln der Min und Max Werte für x, y, und z aus den Daten
+
+\subsubsection{Kino: Schwierigkeiten}
+\begin{enumerate}
+    \item es kommt zu perspektivischen Verzerrungen in der Darstellung, dies ist für die
+  3D-Darstellung der Position gut, führt aber zu Irritation, wenn die 3D-Darstellung als
+  Plott/Koordinatensystem interpretiert wird
+    \item Skalierung: sind die Werte sehr groß/weit gestreut, kommt es zu Problemen der
+  Darstellung: die Labels an den Rändern sind nicht sichtbar,
+  da sie entwerder zu weit am Rand sind, oder zu weit von der Kamera entfernt sind,
+  wenn herausgezoomt wird um sie ins Bild zu holen
+    \item Generell bringt das Zoomen manchmal schwarze Felder, die in der Mitte auftauchen
+  wenn zu weit raus gezoomt wird
+  \item die Größe/Position der Labels müssen immer an die Streuung der Werte angepasst werden
+\item Labels und Koordinatenachsen würden allerdings später durch die Darstellung der Umgebung ausgtauscht und damit wären die Probleme der Perspektivischen Verzerrung nicht mehr da, da sie so gewollt ist
+
+\end{enumerate}
+\subsubsection{Kino: Gut}
+\begin{enumerate}
+    \item Three.js bietet viele Methoden die den Aufbau der Szene und die Grundsätzlichen Funktionen von uns unterstützen
+    \item z.B Zeichnen von Linien zwischen Punkten oder das Anzeigen von Schrift an bestimmten Positionen
+    \item Datenverabeitung via JSON und HTTP Übertragung läuft mit den Testdaten Gut
+
+\end{enumerate}
+
 \clearpage
 
 \section{Schaltplan}

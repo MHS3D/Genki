@@ -1,0 +1,19 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.cube {
+   align-content: center;
+   width: 100px;
+   height: 100px;
+   background-color: #4CAF50;
+   animation: rotateCube 3s infinite linear;
+}
+
+@keyframes rotateCube {
+   from { transform: rotateY(0deg) rotateX(0deg); }
+   to { transform: rotateY(360deg) rotateX(360deg); }
+}

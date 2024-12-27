@@ -105,15 +105,15 @@ Ein grober Zeitplan der Recherche und Umsetzung des Projektplans den wir zu Anfa
         \hline
         \textbf{44} & Projekt aufsetzen                                 &                       &                                          \\
         \hline
-        45          & Daten per HTTP senden, Format der Daten festlegen & Recherche Algorithmen & Recherche: Darstellung Was und Wie?      \\
+        45          & Sendemethode festlegen                            & Recherche Algorithmen & Recherche: Darstellung Was und Wie?      \\
         \hline
-        \textbf{46} &                                                   &                       & Mockups erstellen                        \\
+        \textbf{46} & Format der Daten festlegen                        &                       & Mockups erstellen                        \\
         \hline
-        47          & Herzschrittzähler zum Laufen kriegen              &                       & Aufsetzen des Frontends                  \\
+        47          &  Gyroskopdaten aufnehmen                          &                       & Aufsetzen des Frontends                  \\
         \hline
-        \textbf{48} & Done                                              &                       &                                          \\
+        \textbf{48} & Accelerationdaten aufnehmen                       &                       &                                          \\
         \hline
-        49          &                                                   &                       & Testen der Darstellung mit Dummy-Daten   \\
+        49          & Stetige Anpassung an Bedürfnisse                  &                       & Testen der Darstellung mit Dummy-Daten   \\
         \hline
         \textbf{50} &                                                   &                       &                                          \\
         \hline
@@ -129,6 +129,50 @@ Ein grober Zeitplan der Recherche und Umsetzung des Projektplans den wir zu Anfa
         \hline
     \end{tabularx}
 \end{center}
+
+\subsection{Erfahrungen von Team Micro}
+
+\subsubsection{Beschreibung des Vorgehens:}
+
+\begin{enumerate}
+    \item Die Uhr wurde mit einem ESP32C6 Mikrocontroller aufgebaut, der die Sensoren ansteuert und die Daten sammelt.
+    \item Die Daten werden in einem JSON Format an den PC gesendet.
+    \item In der Entwicklung nutzen wir die Programmiersprache Rust. Dies hatte mehrere Gründe:
+    \begin{enumerate}
+        \item Rust ist eine Systemsprache, die eine hohe Geschwindigkeit und Sicherheit bietet.
+        \item Rust ist eine moderne Sprache, die viele Features bietet, die die Entwicklung erleichtern.
+        \item Sowohl Laurin, als auch Tom haben in den letzten Semestern sehr viel mit Rust gemacht und sind daher vertraut mit der Sprache.
+        \item Eine interessante Herausforderung, da Rust verglichen mit C noch nicht so weit verbreitet ist bei der Mikrocontrollerprogrammierung.
+        \item Weils Spaß macht 😛
+    \end{enumerate}
+    \item Nachdem wir uns für Rust entschieden haben, haben wir uns in die Programmierung des ESP32C6 eingearbeitet.
+    \item Das Framework ESP-IDF bietet viele Funktionen, die die Programmierung erleichtern.
+    \item Wir haben uns entscheiden full std anstatt no std bei der Programmierung zu nutzen, da der Rahmen des Projektes
+    relativ klein ist und wir so auf viele nützliche Funktionen zurückgreifen können ohne Angst haben zu müssen,
+    dass der Speicher zu knapp wird. Dabei ist auch wichtig dass der ESP32C6 für Microcontroller relativ viel Speicher hat.
+    \item Danach haben wir ein simples Hello World auf der Uhr geflashed. Nach paar Anlaufschwierigkeiten auf Grund der Toolchain 
+    lief dies jedoch endlich.
+    \item Jetzt kam der etwas komplexere Teil, um den gleichen I2C Bus für beide Sensoren zu nutzen muss man mehr machen als 
+    in C, da Rust eine Memory Safety Sprache ist. Dies bedeutet, dass ein gleichzeitiger Zugriff auf den I2C Bus von beiden Sensoren
+    oder eine gleichzeitige Zuweisung eines Pins an beide Sensoren nicht möglich ist ohne besondere Vorkehrungen zu treffen.
+    \item Der Lösungsansatz dabei ist ein Shared Bus System, d.h. für die Verarbeitung von I2C Daten wird ein Mutex verwendet, der sich 
+    jeweils die Rechte für den Bus holt und dann wieder abgibt sobald die erforderlichen Daten abgeholt wurden.
+    \item Nachdem wir dies implementiert haben und versucht haben die Daten der Sensoren auszulesen, hatten wir große Schwierigkeiten mit
+    dem Pulsmesser. Dieser spuckte absolut willkürliche Werte aus, die in keinster Weise mit dem Puls des Trägers zusammenhingen.
+    \item Es ist noch nicht ganz klar ob dies an dem Bibliothekstreiber für den Pulsmesser liegt oder ob der Pulsmesser selbst defekt ist.
+    Falls Zeit bleibt könnte man dies noch genauer untersuchen, jedoch ist der Pulsmesser nie ein Hauptbestandteil des Projektes gewesen,
+    sondern eher ein Gimmick.
+    \item Das gute war jedoch, dass wir richtige Daten vom Gyroskop und Beschleunigungssensor bekommen haben
+    \item Daraufhin kreierten wir mit serde und serder_json ein standardisiertes JSON Format, um die Daten an den PC zu senden.
+    \item Damit alles asynchron abläuft, haben wir uns dafür entschieden, dass die Daten in einem Ringbuffer gespeichert werden und
+    ein extra Task die Daten aus dem Ringbuffer in den JSON String umwandelt und an den PC sendet, sobald dieser die Anfrage stellt.
+    Dadurch ist sichergestellt, dass die Daten immer in Echtzeit an den PC gesendet werden können ohne dass der Hauptthread blockiert wird.
+    \item Nachdem dies funktionierte war im Endeffekt die Hauptforderung für Team Micro erfüllt.
+    \item Es gab noch weitere konstante Anpassungen mit Team Magic, um den Drift zu verstehen, jedoch war dies nicht der Hauptfokus von Team Micro.
+\end{enumerate}
+
+\subsection{Erfahrungen von Team Kind}
+
 \subsubsection{Kino: Beschreibung des Vorgehens:}
 
 Für das Erstellen der Mockups wird moqup genutzt (oder @Lara?)

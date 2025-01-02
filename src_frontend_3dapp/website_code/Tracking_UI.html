@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MHS-Watch Tracker</title>
+    <link rel="stylesheet" href="Tracking_style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script src="get_request.js"></script>
+
+</head>
+<body>
+    <header>
+        <header class="custom-header">
+            <div class="menu-icon" onclick="toggleDropdown()">
+                <div class="hamburger"></div>
+            </div>
+            <h1>MHS-Watch Tracker</h1>
+            <div class="user-info">
+                <div class="notification">
+                    <span class="notification-icon">🔔</span>
+                    <span class="notification-count">2</span>
+                </div>
+                <span class="user-name">Renee McKelvey</span>
+            </div>
+            <div id="dropdown-menu" class="dropdown hidden">
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                    <li><a href="#logout">Logout</a></li>
+                </ul>
+            </div>
+        </header>            
+    </header>
+
+    <main>
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-text">
+                        <p>Distance</p>
+                        <h1>6 km</h1>
+                    </div>
+                    <div class="card-icon">🚶‍♂️</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-text">
+                        <p>Lowest Pulse</p>
+                        <h1>72 bpm</h1>
+                    </div>
+                    <div class="card-icon">💓</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-text">
+                        <p>Highest Pulse</p>
+                        <h1>192 bpm</h1>
+                    </div>
+                    <div class="card-icon">💓</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-text">
+                        <p>Date</p>
+                        <h1>19. May 2021</h1>
+                    </div>
+                    <div class="card-icon">📅</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-container">
+            <div class="chart">
+                <div class="chart-header">
+                    <h3>3D-Modell</h3>
+                    <div class="chart-settings"><i class="fas fa-cogs"></i></div>
+                </div>
+                <div class="chart-body">
+                    <!-- Platzhalter für das 3D Modell -->
+                    <div class="chart-placeholder">3D Modell Hier</div>
+                </div>
+            </div>
+        
+            <div class="chart">
+                <div class="chart-header">
+                    <h3>Pulse-Chart</h3>
+                </div>
+                <div class="chart-body">
+                    <!-- Platzhalter für das Pulse-Chart -->
+                    <div class="chart-placeholder">Pulse Chart Hier</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracking Data Table -->
+        <div class="tracking-data">
+            <h2>Tracking Data</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Tracking Date</th>
+                        <th>Distance in km</th>
+                        <th>Options</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>MHS Watch</td>
+                        <td>19 May, 2021 - 10:10 AM</td>
+                        <td>6</td>
+                        <td><button disabled>Options</button></td>
+                        <td><button disabled>Details</button></td>
+                    </tr>
+                    <tr>
+                        <td>MHS Watch</td>
+                        <td>18 May, 2021 - 3:12 PM</td>
+                        <td>3.4</td>
+                        <td><button disabled>Options</button></td>
+                        <td><button disabled>Details</button></td>
+                    </tr>
+                    <tr>
+                        <td>MHS Watch</td>
+                        <td>17 May, 2021 - 6:23 PM</td>
+                        <td>1.2</td>
+                        <td><button disabled>Options</button></td>
+                        <td><button disabled>Details</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

@@ -175,20 +175,29 @@ Ein grober Zeitplan der Recherche und Umsetzung des Projektplans den wir zu Anfa
 
 \subsubsection{Kino: Beschreibung des Vorgehens:}
 
-Für das Erstellen der Mockups wird moqup genutzt (oder @Lara?)
-Mockupbild einfügen und beschreiben...\newline
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/MHS_Mockup.png}
+    \caption{Mockup}
+    \label{fig:Mockup}
+\end{figure}
+
+Für das Erstellen der Mockups wird moqups genutzt.
 \newline
 Es gibt ein Dashboard. Auf dieser Übersicht sollen Puls und 3D-Position nebeneinander in jeweils eigenen Blöcken dargestellt werden.
-Zusätzlich werden Werte wie bisher maximaler Puls dargestellt....\newline
+Zusätzlich werden Werte wie bisher maximaler Puls dargestellt...Recht simpel und übersichtlich gehalten...\newline
 \newline
-Für die 3D-Darstellung wird die JavaScript-Bibliothek THREE.js ausgewählt.
+Nach Absprache mit allen Teams hatten wir beschlossen eine Website fürs Front-End zu bauen und entsprechend auch die Daten per HTTP-Request zu erlangen.
+Das Ziel war am Ende die 3D-Darstellung, also Fokus auf geeignete Bibliohek dafür finden, da noch niemand direkt damit gearbeitet --> gesamtes Team Kino.
+\newline Für die 3D-Darstellung wird die JavaScript-Bibliothek THREE.js ausgewählt, die hatte jeder aufgeschrieben gehabt, sehr flexibel und vorallem JS-library.
+Sprich leicht einzubinden in eine HTTP-Website. Erfüllte gewollte Anforderungen wie bspw Färbung des Modells nach Werten was Anfangs ein Gedanke war.
 (evt. Paper raussuchen warum und was gut ist)\newline
 \newline
 Beschreibung JavaScript-Kram: \newline
 scriptThreeBib\_copy.js: beinhaltet den Aufbau der Szene der 3D-Darstellung der Bewegung \newline
 scriptHeartThreeBib.js: beinhaltet den Aufbau der Szene der Pulsdarstellung \newline
 HelperClass.js: beinhaltet Hilfsmethoden: zum Verarbeiten der Daten, zeichnen der Koordinatenachsen, erstellen der Labels, ermitteln der Min und Max Werte für x, y, und z aus den Daten
-
+\newline website, code bissl erklären.. wichtig für die anderen?
 \subsubsection{Kino: Schwierigkeiten}
 \begin{enumerate}
     \item es kommt zu perspektivischen Verzerrungen in der Darstellung, dies ist für die
@@ -200,15 +209,19 @@ HelperClass.js: beinhaltet Hilfsmethoden: zum Verarbeiten der Daten, zeichnen de
   wenn herausgezoomt wird um sie ins Bild zu holen
     \item Generell bringt das Zoomen manchmal schwarze Felder, die in der Mitte auftauchen
   wenn zu weit raus gezoomt wird
-  \item die Größe/Position der Labels müssen immer an die Streuung der Werte angepasst werden
-\item Labels und Koordinatenachsen würden allerdings später durch die Darstellung der Umgebung ausgtauscht und damit wären die Probleme der Perspektivischen Verzerrung nicht mehr da, da sie so gewollt ist
+    \item die Größe/Position der Labels müssen immer an die Streuung der Werte angepasst werden
+    \item Labels und Koordinatenachsen würden allerdings später durch die Darstellung der Umgebung ausgtauscht und damit wären die Probleme der Perspektivischen Verzerrung nicht mehr da, da sie so gewollt ist
+    \item Maus ändert sich zum Textcursor auf der Website obwohl nichts manuell zu bearbeiten ist, mögliche Lösung einen Container drüber zu legen
+    \item Error beim Request die Daten abzuholen, Access to fetch at 'http://localhost:8080/' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. --> gelöst durch extra Header beim Sender
 
 \end{enumerate}
+
 \subsubsection{Kino: Gut}
 \begin{enumerate}
     \item Three.js bietet viele Methoden die den Aufbau der Szene und die Grundsätzlichen Funktionen von uns unterstützen
     \item z.B Zeichnen von Linien zwischen Punkten oder das Anzeigen von Schrift an bestimmten Positionen
     \item Datenverabeitung via JSON und HTTP Übertragung läuft mit den Testdaten Gut
+    \item mockup simpel gehalten, Frontend bau lief gut
 
 \end{enumerate}
 

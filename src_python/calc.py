@@ -72,7 +72,7 @@ def update_position(acceleration, gyro, dt):
 
     # Integration der Geschwindigkeit und Position (Euler-Integration)
     VELOCITY += acc_world * dt
-    POSITION += VELOCITY * dt
+    POSITION += 0.5*VELOCITY * dt
     POSITION, VELOCITY, ANGLE, P = kalman_filter_update(gyro, dt)
     return POSITION, VELOCITY, ANGLE
 

@@ -29,14 +29,14 @@ mod timer;
 mod wifi;
 
 const BAUDRATE: u32 = 115200;
-const AVG_ACC_X: f32 = -0.04;
-const AVG_ACC_Y: f32 = 0.02;
-const AVG_ACC_Z: f32 = 0.89;
-const AVG_GYRO_X: f32 = -0.03;
-const AVG_GYRO_Y: f32 = 0.02;
-const AVG_GYRO_Z: f32 = 0.02;
+const AVG_ACC_X: f32 = 0.0;
+const AVG_ACC_Y: f32 = 0.0;
+const AVG_ACC_Z: f32 = 0.0;
+const AVG_GYRO_X: f32 = 0.0;
+const AVG_GYRO_Y: f32 = 0.0;
+const AVG_GYRO_Z: f32 = 0.0;
 
-const WIFI_SSD: &str = "baguette";
+const WIFI_SSD: &str = "obama";
 const WIFI_PSK: &str = "broetchen123";
 
 const IGNORE_WIFI: bool = false;

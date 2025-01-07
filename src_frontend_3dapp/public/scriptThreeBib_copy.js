@@ -3,26 +3,28 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.120.1/build/three.m
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.120.1/examples/jsm/controls/OrbitControls.js';
 import { HelperClass } from './HelperClass.js';
 
+
 //Daten abrufen und vorbereiten#
 // Daten laden (Testdaten1)
- fetch('./data/daten_richtig.json')
-    .then(response => response.json())  // Parsen der JSON-Daten
-    .then(data => {
-        init(data);  // Funktion zur Initialisierung der Szene
-    })
-   .catch(error => console.error('Fehler beim Laden der Daten:', error));
+//  fetch('./data/daten_richtig.json')
+//     .then(response => response.json())  // Parsen der JSON-Daten
+//     .then(data => {
+//         init(data);  // Funktion zur Initialisierung der Szene
+//     })
+//    .catch(error => console.error('Fehler beim Laden der Daten:', error));
 
-//fetch('http://localhost:8080/src_python/daten.json')  // URL des Endpunkts auf Ihrem lokalen Server
-//    .then(response => {
-//        if (!response.ok) {
-//            throw new Error(`HTTP-Fehler! Status: ${response.status}`);
-//        }
-//        return response.json();  // Parsen der JSON-Daten
-//    })
-//    .then(data => {
-//        init(data);  // Funktion zur Initialisierung der Szene
-//    })
-//    .catch(error => console.error('Fehler beim Abrufen der Daten:', error));
+fetch('http://10.192.73.165:80')  // URL des Endpunkts auf Ihrem lokalen Server
+   .then(response => {
+       if (!response.ok) {
+           throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+       }
+       return response.json();  // Parsen der JSON-Daten
+   })
+   .then(data => {
+        console.log("Received data: ", data);
+       init(data);  // Funktion zur Initialisierung der Szene
+   })
+   .catch(error => console.error('Fehler beim Abrufen der Daten:', error));
 
 
 function init(data) {

@@ -36,15 +36,8 @@ const AVG_GYRO_X: f32 = -0.03;
 const AVG_GYRO_Y: f32 = 0.02;
 const AVG_GYRO_Z: f32 = 0.02;
 
-/// This configuration is picked up at compile time by `build.rs` from the
-/// file `cfg.toml`.
-#[toml_cfg::toml_config]
-pub struct Config {
-    #[default("baguette")]
-    wifi_ssid: &'static str,
-    #[default("broetchen123")]
-    wifi_psk: &'static str,
-}
+const WIFI_SSD: &str = "baguette";
+const WIFI_PSK: &str = "broetchen123";
 
 const IGNORE_WIFI: bool = false;
 
@@ -76,12 +69,11 @@ fn main() -> Result<()> {
 
     log::info!("System Event Loop taken");
 
-    let app_config = CONFIG;
     // Connect to the Wi-Fi network
     let peripherals = Peripherals::take().unwrap();
     let _wifi = match wifi::connect_wifi(
-        app_config.wifi_ssid,
-        app_config.wifi_psk,
+        WIFI_SSD,
+        WIFI_PSK,
         peripherals.modem,
         sysloop,
     ) {

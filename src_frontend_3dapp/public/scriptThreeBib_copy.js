@@ -1,4 +1,4 @@
-// Three.js und OrbitControls importieren
+ // Three.js und OrbitControls importieren
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.120.1/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.120.1/examples/jsm/controls/OrbitControls.js';
 import { HelperClass } from './HelperClass.js';
@@ -33,8 +33,10 @@ function init(data) {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 500);
     const renderer = new THREE.WebGLRenderer();
     scene.background = new THREE.Color(0, 0, 0); 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const container = document.getElementById('3d-container'); // Korrekte ID referenzieren
+    renderer.setSize(container.offsetWidth, container.offsetHeight); // Größe des Renderers
+    container.innerHTML = ""; // Sicherstellen, dass der Container leer ist
+    container.appendChild(renderer.domElement);
     //ende setup
 
     //Konstanten
